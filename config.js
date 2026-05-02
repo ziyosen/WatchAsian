@@ -4,7 +4,7 @@ const SERVER = {
 }
 
 const DRAMA = {
-    DOMAIN: process.env.DOMAIN || "https://watchasia.to",
+    DOMAIN: process.env.DOMAIN || "https://drakor.kita.mobi",
 }
 
 const ENCRYPTION = {
