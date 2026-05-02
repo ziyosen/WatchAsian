@@ -4,7 +4,10 @@ const SERVER = {
 }
 
 const DRAMA = {
-    DOMAIN: process.env.DOMAIN || "https://drakor.kita.mobi",
+    // Ganti domain ke iQIYI
+    DOMAIN: process.env.DOMAIN || "https://www.iq.com",
+    // Tambahkan base API jika diperlukan agar service lebih rapi
+    API_BASE: "https://itv.iq.com/intl-common"
 }
 
 const ENCRYPTION = {
