@@ -1,20 +1,21 @@
 import axios from "axios";
+import config from "../config.js";
 
-// Base URL API iQIYI (biasanya menggunakan API internasional)
-const BASE_URL = "https://itv.iq.com/intl-common";
-const DOMAIN = "https://www.iq.com";
+// Mengambil base URL dari config (itv.iq.com)
+const BASE_URL = config.DRAMA.API_BASE || "https://itv.iq.com/intl-common";
+const DOMAIN = config.DRAMA.DOMAIN || "https://www.iq.com";
 
-// Helper untuk headers agar tidak diblokir
 const headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Referer": DOMAIN,
     "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7"
 };
 
+/**
+ * Mengambil daftar drama terbaru dari iQIYI
+ */
 export const getAllShows = async (page = 1) => {
     try {
-        // iQIYI menggunakan genreId atau categoryId. 2 adalah ID untuk Drama.
-        // Paging di iQIYI biasanya menggunakan 'pageNum'
         const response = await axios.get(`${BASE_URL}/category/list`, {
             params: {
                 categoryId: 2, 
@@ -25,7 +26,6 @@ export const getAllShows = async (page = 1) => {
             headers
         });
         
-        // Memetakan hasil agar sesuai dengan struktur controller kamu
         return response.data.data.map(item => ({
             id: item.albumId,
             title: item.name,
@@ -34,10 +34,13 @@ export const getAllShows = async (page = 1) => {
             score: item.score
         }));
     } catch (error) {
-        throw Error("Gagal mengambil daftar drama dari iQIYI");
+        throw new Error("Gagal fetch getAllShows: " + error.message);
     }
 };
 
+/**
+ * Mengambil detail drama berdasarkan ID
+ */
 export const getShowById = async (id) => {
     try {
         const response = await axios.get(`${BASE_URL}/album/detail`, {
@@ -58,13 +61,15 @@ export const getShowById = async (id) => {
             synopsis: data.description
         };
     } catch (error) {
-        throw Error("Detail drama tidak ditemukan");
+        throw new Error("Gagal fetch getShowById: " + error.message);
     }
 };
 
+/**
+ * Mengambil informasi streaming episode
+ */
 export const getEpisodeById = async (id) => {
     try {
-        // Di iQIYI, kita butuh tvId untuk mengambil link video/streaming
         const response = await axios.get(`${BASE_URL}/video/playinfo`, {
             params: {
                 tvId: id,
@@ -73,16 +78,21 @@ export const getEpisodeById = async (id) => {
             headers
         });
 
+        const data = response.data.data;
         return {
             id: id,
-            video_url: response.data.data.playUrl, // Tergantung ketersediaan API
-            subtitle: response.data.data.subtitles || []
+            video_url: data.playUrl || null,
+            subtitles: data.subtitles || [],
+            title: data.name
         };
     } catch (error) {
-        throw Error("Gagal mengambil data episode");
+        throw new Error("Gagal fetch getEpisodeById: " + error.message);
     }
 };
 
+/**
+ * Mencari drama di iQIYI
+ */
 export const search = async (keyword) => {
     try {
         const response = await axios.get(`${BASE_URL}/search/search`, {
@@ -95,12 +105,14 @@ export const search = async (keyword) => {
             headers
         });
 
-        return response.data.data.docInfos.map(item => ({
+        const results = response.data.data.docInfos || [];
+        return results.map(item => ({
             id: item.albumId,
             title: item.albumName,
-            poster: item.albumImageUrl
+            poster: item.albumImageUrl,
+            score: item.score
         }));
     } catch (error) {
-        throw Error("Pencarian gagal");
+        throw new Error("Gagal fetch search: " + error.message);
     }
 };
