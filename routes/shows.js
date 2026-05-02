@@ -1,10 +1,11 @@
 import { Router } from "express";
-import * as controller from "../controllers/shows.js";
+import * as showsController from "../controllers/shows.js";
 
-const showsRouter = Router();
+const router = Router();
 
-showsRouter.get("/", controller.handleGetAllShows);
+router.get("/", showsController.handleGetAllShows);
+router.get("/search", showsController.handleSearch);
+router.get("/show/:id", showsController.handleGetShowById);
+router.get("/episode/:id", showsController.handleGetEpisodeById);
 
-showsRouter.get("/:id", controller.handleGetShowById);
-
-export default showsRouter;
+export default router;
